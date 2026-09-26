@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Designated Fielder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:#1c1c1a; --paper:#f2ede1; --field:#173d2c; --field-2:#0f2a1e; --clay:#8a3324; --line:#c9c0a8;
+    box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --paper:#12241a; --ink:#eee8d8; --line:#2c4736; }
+  }
+  :root[data-theme="dark"] { --paper:#12241a; --ink:#eee8d8; --line:#2c4736; }
+  html { scroll-padding-top:env(safe-area-inset-top,0px); height:100%; }
+  * { box-sizing:border-box; }
+  body { height:100%; margin:0; background:var(--field); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+  .deck { position:relative; height:100%; overflow:hidden; }
+  .slide {
+    position:absolute; inset:0; display:none; flex-direction:column; justify-content:center;
+    padding:8vh 8vw; background:var(--paper); color:var(--ink);
+  }
+  .slide.active { display:flex; }
+  h1,h2 { font-family:"Fraunces",Georgia,serif; font-weight:600; line-height:1.05; margin:0 0 .5em; }
+  h1 { font-size:clamp(2rem,5vw,3.6rem); }
+  h2 { font-size:clamp(1.4rem,3.2vw,2.2rem); color:var(--clay); }
+  p, li { font-size:clamp(1rem,1.5vw,1.25rem); line-height:1.55; max-width:64ch; }
+  .kicker { font-family:"Fraunces",serif; font-style:italic; color:var(--clay); font-size:1.05rem; margin-bottom:1rem; }
+  .num { font-family:"Fraunces",serif; font-size:clamp(2.6rem,7vw,5rem); color:var(--clay); line-height:1; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:2rem; max-width:70ch; }
+  .card { border:1px solid var(--line); padding:1.2rem 1.4rem; }
+  table { border-collapse:collapse; max-width:60ch; font-size:1rem; }
+  td,th { border-bottom:1px solid var(--line); padding:.5rem 1rem .5rem 0; text-align:left; }
+  th { font-family:"Fraunces",serif; }
+  .flow { border-left:3px solid var(--clay); padding-left:1.2rem; margin:.4rem 0; }
+  .foot { position:absolute; bottom:env(safe-area-inset-bottom,1.2rem); left:8vw; right:8vw; display:flex; justify-content:space-between; align-items:center; font-size:.85rem; opacity:.6; }
+  .nav { position:fixed; bottom:env(safe-area-inset-bottom,1rem); right:1.2rem; display:flex; gap:.5rem; z-index:10; }
+  .nav button { font-family:"Fraunces",serif; background:var(--ink); color:var(--paper); border:none; width:2.4rem; height:2.4rem; cursor:pointer; font-size:1.1rem; }
+  .nav button:disabled { opacity:.3; cursor:default; }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <section class="slide active">
+    <div class="kicker">A hypothetical rule, tested against 150 seasons</div>
+    <h1>What if fielding didn't require hitting?</h1>
+    <p>Baseball let pitchers stop batting in 1973. It never asked the mirror question: could a great glove stop batting too? This is a counterfactual test of a &ldquo;designated fielder,&rdquo; built from the Lahman database, 1876&ndash;2025.</p>
+    <div class="foot"><span>The Designated Fielder</span><span>1 / 7</span></div>
+  </section>
+
+  <section class="slide">
+    <h2>Two different questions</h2>
+    <div class="grid">
+      <div class="card"><p><strong>Individual suitability</strong><br>Which player-seasons look like a DF &mdash; great glove, weak bat, relative to their league and position?</p></div>
+      <div class="card"><p><strong>Team impact</strong><br>Did a specific team actually have the roster pieces &mdash; a bench bat, a better glove &mdash; to gain runs from the swap?</p></div>
+    </div>
+    <p style="margin-top:2rem">Kept deliberately separate. One is an input to the other &mdash; not the answer.</p>
+    <div class="foot"><span>The Designated Fielder</span><span>2 / 7</span></div>
+  </section>
+
+  <section class="slide">
+    <h2>Defense doesn't convert to runs cleanly &mdash; and pretending it does breaks the model</h2>
+    <p>A first pass converted fielding-range differences into runs at ~0.75 runs/play, the textbook constant. It produced single-season values of <strong>+150 to +200 runs</strong> &mdash; nonsense, since even the best real defensive seasons top out near +30.</p>
+    <p>Why: putouts mix real skill with a team's groundball rate, park, and pitching staff &mdash; context only batted-ball data can separate. So defense here is a <strong>position-season z-score</strong>, not invented runs.</p>
+    <div class="foot"><span>The Designated Fielder</span><span>3 / 7</span></div>
+  </section>
+
+  <section class="slide">
+    <h2>The team-level swap, in three roles</h2>
+    <div class="flow"><p><strong>Incumbent</strong> &mdash; today's real starter: bats and fields the position.</p></div>
+    <div class="flow"><p><strong>DF candidate</strong> &mdash; the teammate with the best glove at that spot, only if better than the incumbent's.</p></div>
+    <div class="flow"><p><strong>Displaced hitter</strong> &mdash; the best bench bat, who inherits the incumbent's plate appearances.</p></div>
+    <p style="margin-top:1.5rem">Net Offensive Swap = (displaced hitter's runs/PA &minus; incumbent's runs/PA) &times; incumbent's actual PA &mdash; real runs, no defensive assumption required.</p>
+    <div class="foot"><span>The Designated Fielder</span><span>4 / 7</span></div>
+  </section>
+
+  <section class="slide">
+    <h2>Across 2,459 viable team-seasons</h2>
+    <table>
+      <tr><th>Team-seasons with a viable swap</th><td>2,459 / 3,614 (68%)</td></tr>
+      <tr><th>Mean best-swap gain</th><td>+16.6 runs</td></tr>
+      <tr><th>Swaps positive on offense alone</th><td>71%</td></tr>
+      <tr><th>Corr(swap size, defense gap)</th><td>&minus;0.06</td></tr>
+    </table>
+    <p style="margin-top:1.5rem">That near-zero correlation is the finding: gain is driven by <em>whether a bench bat is sitting unused</em>, almost independent of how much better the glove is.</p>
+    <div class="foot"><span>The Designated Fielder</span><span>5 / 7</span></div>
+  </section>
+
+  <section class="slide">
+    <h2>1985 Cardinals, right field</h2>
+    <p><span class="num">+117</span> runs modeled</p>
+    <p>Incumbent Vince Coleman keeps his glove-average bat. Tito Landrum takes over defensively. Cesar Cedeno &mdash; just 82 plate appearances that year, at an elite rate &mdash; inherits the bat. The largest single swap in the sample.</p>
+    <div class="foot"><span>The Designated Fielder</span><span>6 / 7</span></div>
+  </section>
+
+  <section class="slide">
+    <h2>What this doesn't prove</h2>
+    <p>Some &ldquo;displaced hitters&rdquo; (Mark McGwire, 2000 Cardinals) had few plate appearances from a mid-season trade &mdash; not from being buried for a bad glove. The model can't yet tell those apart.</p>
+    <p style="margin-top:1rem">Still: two-thirds of team-seasons in baseball history had a real bench bat sitting behind a fielder who didn't need to hit as well as he did &mdash; and the rule that would have unlocked it never existed.</p>
+    <div class="foot"><span>The Designated Fielder</span><span>7 / 7</span></div>
+  </section>
+
+</div>
+<div class="nav">
+  <button id="prev" aria-label="Previous">&larr;</button>
+  <button id="next" aria-label="Next">&rarr;</button>
+</div>
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let i = 0;
+  function show(n){ slides[i].classList.remove('active'); i = Math.max(0, Math.min(slides.length-1, n)); slides[i].classList.add('active');
+    document.getElementById('prev').disabled = i===0; document.getElementById('next').disabled = i===slides.length-1; }
+  document.getElementById('next').onclick = () => show(i+1);
+  document.getElementById('prev').onclick = () => show(i-1);
+  window.addEventListener('keydown', e => { if(e.key==='ArrowRight') show(i+1); if(e.key==='ArrowLeft') show(i-1); });
+  show(0);
+</script>
+</body>
+</html>
